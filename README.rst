@@ -10,7 +10,7 @@ Install
 
 ::
 
-  % pip install -e "git+https://github.com/shirou/norikra-client-python.git"
+  % pip install "git+https://github.com/shirou/norikra-client-python.git"
 
 Usage
 ----------
