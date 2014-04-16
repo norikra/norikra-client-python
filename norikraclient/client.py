@@ -14,6 +14,7 @@ class Client(object):
 
     def __init__(self, host="localhost", port=RPC_DEFAULT_PORT, opts={}):
         addr = "http://{}:{}/".format(host, port)
+        self.addr = addr
         self.client = MsgPackClientOverHttp(addr)
 
         if 'connection_timeout' in opts:

@@ -36,6 +36,13 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=requires,
-    dependency_links=deplinks
+    dependency_links=deplinks,
+    entry_points={
+        'console_scripts': [
+            'norikra-client-py = norikraclient.command:main',
+        ],
+    }
+
+
 )
 
