@@ -52,12 +52,12 @@ def parse_target(origargs):
 
     # close
     parser_close = subparsers.add_parser('close',
-                                        help="close existing target and all its queries")
+                                         help="close existing target and all its queries")
     parser_close.add_argument('target', nargs=1)
 
     # modify
     parser_modify = subparsers.add_parser('modify',
-                                        help="modify target to do define fields automatically or not")
+                                          help="modify target to do define fields automatically or not")
     parser_modify.add_argument('target', nargs=1)
     parser_modify.add_argument('bool_value', nargs=1)
 
@@ -70,6 +70,7 @@ def parse_target(origargs):
     dict_orig.update(dict_args)
 
     return dict_orig
+
 
 def parse_admin(origargs):
     parser = argparse.ArgumentParser(add_help=False)
@@ -120,4 +121,3 @@ def parse_commands(argv):
     args = args.func(args)
 
     return args
-

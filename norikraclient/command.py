@@ -24,6 +24,7 @@ class EventCmd(object):
     def fetch(self, nclient, args):
         print(nclient.event(args['query_name']))
 
+
 class TargetCmd(object):
     def list(self, nclient, args):
         if args['simple'] is False:
@@ -51,9 +52,10 @@ class TargetCmd(object):
         nclient.close(args['target'][0])
 
     def modify(self, nclient, args):
-        auto_field = args['bool_value'][0] in ['yes','true','auto']
+        auto_field = args['bool_value'][0] in ['yes', 'true', 'auto']
 
         nclient.modify(args['target'][0], auto_field)
+
 
 class AdminCmd(object):
     def stats(self, nclient, args):
@@ -81,7 +83,7 @@ class AdminCmd(object):
                            "outbound": {},
                            "route_exec": {},
                            "timer_exec": {}
-                       },
+                },
                 "rpc": {},
                 "web": {},
             },
@@ -92,6 +94,7 @@ class AdminCmd(object):
 
         print(json.dumps(v, sort_keys=True,
                          indent=4, separators=(',', ': ')))
+
 
 def main(argv=sys.argv):
     """norikra-client-py main command-line entry"""
@@ -124,8 +127,6 @@ def main(argv=sys.argv):
         c = AdminCmd()
         if sub == 'stats':
             c.stats(nclient, args)
-
-
 
     return True
 
