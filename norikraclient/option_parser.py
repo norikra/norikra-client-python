@@ -50,6 +50,17 @@ def parse_target(origargs):
     parser_open.add_argument('target', nargs=1)
     parser_open.add_argument('field_defs', nargs="*")
 
+    # close
+    parser_close = subparsers.add_parser('close',
+                                        help="close existing target and all its queries")
+    parser_close.add_argument('target', nargs=1)
+
+    # modify
+    parser_modify = subparsers.add_parser('modify',
+                                        help="modify target to do define fields automatically or not")
+    parser_modify.add_argument('target', nargs=1)
+    parser_modify.add_argument('bool_value', nargs=1)
+
     args = parser.parse_args(origargs.rest)
 
     # convert to dict in order to merge all args

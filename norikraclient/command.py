@@ -43,11 +43,17 @@ class TargetCmd(object):
                 fname, ftype = s.split(':')
                 fields[fname] = ftype
 
-        auto_field = True
-        if args['suppress_auto_field']:
-            auto_field = False
+        auto_field = not args['suppress_auto_field']
 
         nclient.open(args['target'][0], fields, auto_field)
+
+    def close(self, nclient, args):
+        nclient.close(args['target'][0])
+
+    def modify(self, nclient, args):
+        auto_field = args['bool_value'][0] in ['yes','true','auto']
+
+        nclient.modify(args['target'][0], auto_field)
 
 def main(argv=sys.argv):
     """norikra-client-py main command-line entry"""
@@ -72,6 +78,10 @@ def main(argv=sys.argv):
             c.list(nclient, args)
         elif sub == 'open':
             c.open(nclient, args)
+        elif sub == 'close':
+            c.close(nclient, args)
+        elif sub == 'modify':
+            c.modify(nclient, args)
 
 
 
