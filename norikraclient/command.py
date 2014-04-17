@@ -55,6 +55,44 @@ class TargetCmd(object):
 
         nclient.modify(args['target'][0], auto_field)
 
+class AdminCmd(object):
+    def stats(self, nclient, args):
+        targets = []
+        queries = []
+
+        queries = nclient.queries()
+        for t in nclient.targets():
+            fields = {}
+            for f in nclient.fields(t['name']):
+                if f['type'] == 'hash' or f['type'] == 'array':
+                    continue
+                fields[f['name']] = f
+            targets.append({
+                "name": t["name"],
+                "fields": fields,
+                "auto_field": t["auto_field"],
+                })
+
+        import json
+
+        v = {
+            "threads": {
+                "engine": {"inbound": {},
+                           "outbound": {},
+                           "route_exec": {},
+                           "timer_exec": {}
+                       },
+                "rpc": {},
+                "web": {},
+            },
+            "log": {},
+            "targets": targets,
+            "queries": queries,
+        }
+
+        print(json.dumps(v, sort_keys=True,
+                         indent=4, separators=(',', ': ')))
+
 def main(argv=sys.argv):
     """norikra-client-py main command-line entry"""
 
@@ -82,6 +120,10 @@ def main(argv=sys.argv):
             c.close(nclient, args)
         elif sub == 'modify':
             c.modify(nclient, args)
+    elif command == 'admin':
+        c = AdminCmd()
+        if sub == 'stats':
+            c.stats(nclient, args)
 
 
 

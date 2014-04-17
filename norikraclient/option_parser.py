@@ -71,7 +71,27 @@ def parse_target(origargs):
 
     return dict_orig
 
+def parse_admin(origargs):
+    parser = argparse.ArgumentParser(add_help=False)
+    subparsers = parser.add_subparsers(help='sub commands', dest='sub')
+
+    # stats
+    parser_stats = subparsers.add_parser('stats',
+                                         help="dump stats json: same with norikra server's --stats option")
+
+    args = parser.parse_args(origargs.rest)
+
+    # convert to dict in order to merge all args
+    dict_orig = vars(origargs)
+    dict_orig['command'] = 'admin'
+    dict_args = vars(args)
+    dict_orig.update(dict_args)
+
+    return dict_orig
+
+
 def parse_commands(argv):
+    '''This is parent parser which parses subcommands.'''
     parser = argparse.ArgumentParser(description='norikra client for python',
                                      prog='norikra-client-py')
     parser.add_argument('--host', action='store', help='HOST',
@@ -91,6 +111,10 @@ def parse_commands(argv):
     parser_target = subparsers.add_parser('target', help='manage targets')
     parser_target.add_argument('rest', nargs='*')
     parser_target.set_defaults(func=parse_target)
+
+    parser_admin = subparsers.add_parser('admin', help='manage admins')
+    parser_admin.add_argument('rest', nargs='*')
+    parser_admin.set_defaults(func=parse_admin)
 
     args = parser.parse_args()
     args = args.func(args)
