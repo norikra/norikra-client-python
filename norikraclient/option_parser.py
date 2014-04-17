@@ -32,6 +32,39 @@ def parse_event(origargs):
     return dict_orig
 
 
+def parse_query(origargs):
+    parser = argparse.ArgumentParser(add_help=False)
+    subparsers = parser.add_subparsers(help='sub commands', dest='sub')
+
+    # list
+    parser_list = subparsers.add_parser('list',
+                                        help="show list of queries")
+    parser_list.add_argument('-s', '--simple', action='store_true',
+                             help="suppress header/footer")
+
+    # add
+    parser_add = subparsers.add_parser('add',
+                                       help="register a query")
+    parser_add.add_argument('query_name', nargs=1)
+    parser_add.add_argument('expression', nargs="*")
+
+    # remove
+    parser_remove = subparsers.add_parser('remove',
+                                         help="deregister a query")
+    parser_remove.add_argument('query_name', nargs=1)
+
+
+    args = parser.parse_args(origargs.rest)
+
+    # convert to dict in order to merge all args
+    dict_orig = vars(origargs)
+    dict_orig['command'] = 'query'
+    dict_args = vars(args)
+    dict_orig.update(dict_args)
+
+    return dict_orig
+
+
 def parse_target(origargs):
     parser = argparse.ArgumentParser(add_help=False)
     subparsers = parser.add_subparsers(help='sub commands', dest='sub')
@@ -107,7 +140,7 @@ def parse_commands(argv):
 
     parser_query = subparsers.add_parser('query', help='manage queries')
     parser_query.add_argument('rest', nargs='*')
-#    parser_query.set_defaults(func=parse_query)
+    parser_query.set_defaults(func=parse_query)
 
     parser_target = subparsers.add_parser('target', help='manage targets')
     parser_target.add_argument('rest', nargs='*')

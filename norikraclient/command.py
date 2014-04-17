@@ -25,6 +25,34 @@ class EventCmd(object):
         print(nclient.event(args['query_name']))
 
 
+class QueryCmd(object):
+    def list(self, nclient, args):
+        if args['simple'] is False:
+            print("\t".join(["NAME", "GROUP", "TARGETS", "QUERY"]))
+        queries = nclient.queries()
+        queries = sorted(queries)
+        for q in queries:
+            print("{}\t{}\t{}\t{}".format(
+                q['name'],
+                'default' if q['group'] is None else q['group'],
+                ','.join(q['targets']),
+                " ".join([qe.strip() for qe in q['expression'].split("\n")]),
+            ))
+
+        if args['simple'] is False:
+            print("{} queries found.".format(len(queries)))
+
+    def add(self, nclient, args):
+        q = args['query_name'][0]
+        e = " ".join(args['expression'])
+        group = 'default'  ## TODO
+        nclient.register(q, group, e)
+
+    def remove(self, nclient, args):
+        q = args['query_name'][0]
+        nclient.deregister(q)
+
+
 class TargetCmd(object):
     def list(self, nclient, args):
         if args['simple'] is False:
@@ -113,6 +141,14 @@ def main(argv=sys.argv):
             c.send(nclient, args)
         elif sub == 'fetch':
             c.fetch(nclient, args)
+    elif command == 'query':
+        c = QueryCmd()
+        if sub == 'list':
+            c.list(nclient, args)
+        elif sub == 'add':
+            c.add(nclient, args)
+        elif sub == 'remove':
+            c.remove(nclient, args)
     elif command == 'target':
         c = TargetCmd()
         if sub == 'list':
