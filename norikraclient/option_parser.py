@@ -4,9 +4,9 @@ from __future__ import division, print_function, absolute_import
 
 import argparse
 
+
 def parse_event(origargs):
-    parser = argparse.ArgumentParser(description='event',
-                                     prog='norikra-client-py', add_help=False)
+    parser = argparse.ArgumentParser(add_help=False)
     subparsers = parser.add_subparsers(help='sub commands', dest='sub')
 
     # fetch
@@ -31,6 +31,35 @@ def parse_event(origargs):
 
     return dict_orig
 
+
+def parse_target(origargs):
+    parser = argparse.ArgumentParser(add_help=False)
+    subparsers = parser.add_subparsers(help='sub commands', dest='sub')
+
+    # list
+    parser_list = subparsers.add_parser('list',
+                                        help="show list of targets")
+    parser_list.add_argument('-s', '--simple', action='store_true',
+                             help="suppress header/footer")
+
+    # open
+    parser_open = subparsers.add_parser('open',
+                                        help="create new target (and define its fields)")
+    parser_open.add_argument('-x', '--suppress_auto_field', action='store_true',
+                             help="suppress to define fields automatically")
+    parser_open.add_argument('target', nargs=1)
+    parser_open.add_argument('field_defs', nargs="*")
+
+    args = parser.parse_args(origargs.rest)
+
+    # convert to dict in order to merge all args
+    dict_orig = vars(origargs)
+    dict_orig['command'] = 'target'
+    dict_args = vars(args)
+    dict_orig.update(dict_args)
+
+    return dict_orig
+
 def parse_commands(argv):
     parser = argparse.ArgumentParser(description='norikra client for python',
                                      prog='norikra-client-py')
@@ -45,7 +74,12 @@ def parse_commands(argv):
     parser_event.set_defaults(func=parse_event)
 
     parser_query = subparsers.add_parser('query', help='manage queries')
+    parser_query.add_argument('rest', nargs='*')
+#    parser_query.set_defaults(func=parse_query)
+
     parser_target = subparsers.add_parser('target', help='manage targets')
+    parser_target.add_argument('rest', nargs='*')
+    parser_target.set_defaults(func=parse_target)
 
     args = parser.parse_args()
     args = args.func(args)
