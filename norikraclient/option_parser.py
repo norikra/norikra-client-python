@@ -50,15 +50,43 @@ def parse_query(origargs):
 
     # remove
     parser_remove = subparsers.add_parser('remove',
-                                         help="deregister a query")
+                                          help="deregister a query")
     parser_remove.add_argument('query_name', nargs=1)
-
 
     args = parser.parse_args(origargs.rest)
 
     # convert to dict in order to merge all args
     dict_orig = vars(origargs)
     dict_orig['command'] = 'query'
+    dict_args = vars(args)
+    dict_orig.update(dict_args)
+
+    return dict_orig
+
+
+def parse_field(origargs):
+    parser = argparse.ArgumentParser(add_help=False)
+    subparsers = parser.add_subparsers(help='sub commands', dest='sub')
+
+    # list
+    parser_list = subparsers.add_parser('list',
+                                        help="show list of fields")
+    parser_list.add_argument('-s', '--simple', action='store_true',
+                             help="suppress header/footer")
+    parser_list.add_argument('target', nargs=1)
+
+    # add
+    parser_add = subparsers.add_parser('add',
+                                       help="register a query")
+    parser_add.add_argument('target', nargs=1)
+    parser_add.add_argument('field', nargs=1)
+    parser_add.add_argument('type', nargs=1)
+
+    args = parser.parse_args(origargs.rest)
+
+    # convert to dict in order to merge all args
+    dict_orig = vars(origargs)
+    dict_orig['command'] = 'field'
     dict_args = vars(args)
     dict_orig.update(dict_args)
 
@@ -133,6 +161,10 @@ def parse_commands(argv):
     parser.add_argument('--port', action='store', help='PORT',
                         type=int, default=26571)
     subparsers = parser.add_subparsers(help='sub commands')
+
+    parser_field = subparsers.add_parser('field', help='manage fields')
+    parser_field.add_argument('rest', nargs='*')
+    parser_field.set_defaults(func=parse_field)
 
     parser_event = subparsers.add_parser('event', help='send/fetch events')
     parser_event.add_argument('rest', nargs='*')

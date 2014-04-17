@@ -45,12 +45,31 @@ class QueryCmd(object):
     def add(self, nclient, args):
         q = args['query_name'][0]
         e = " ".join(args['expression'])
-        group = 'default'  ## TODO
+        group = 'default'  # TODO
         nclient.register(q, group, e)
 
     def remove(self, nclient, args):
         q = args['query_name'][0]
         nclient.deregister(q)
+
+
+class FieldCmd(object):
+    def list(self, nclient, args):
+        if args['simple'] is False:
+            print("{}\t{}".format("TARGET", "TYPE", "OPTIONAL"))
+
+        target = args['target'][0]
+        fields = nclient.fields(target)
+        for f in fields:
+            print("{}\t{}".format(f['name'], f['type'], f['optional']))
+        if args['simple'] is False:
+            print("{} field(s) found.".format(len(fields)))
+
+    def add(self, nclient, args):
+        target = args['target'][0]
+        field = args['field'][0]
+        type = args['type'][0]
+        nclient.reserve(target, field, type)
 
 
 class TargetCmd(object):
@@ -141,6 +160,12 @@ def main(argv=sys.argv):
             c.send(nclient, args)
         elif sub == 'fetch':
             c.fetch(nclient, args)
+    elif command == 'field':
+        c = FieldCmd()
+        if sub == 'list':
+            c.list(nclient, args)
+        elif sub == 'add':
+            c.add(nclient, args)
     elif command == 'query':
         c = QueryCmd()
         if sub == 'list':
