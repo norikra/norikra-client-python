@@ -10,19 +10,36 @@ from . client import Client
 from . option_parser import parse_commands
 
 
-class EventCmd(object):
-    def send(self, nclient, args):
-        buffer = []
-        for line in sys.stdin:
-            if len(buffer) >= args['batch_size']:
-                nclient.send(args['target'], buffer)
-                buffer = []
-                buffer.append(json.loads(line))
-            if len(buffer) > 0:
-                nclient.send(args['target'], buffer)
+class TargetCmd(object):
+    def list(self, nclient, args):
+        if args['simple'] is False:
+            print("{}\t{}".format("TARGET", "AUTO_FIELD"))
+        targets = nclient.targets()
+        for t in targets:
+            print("{}\t{}".format(t['name'], t['auto_field']))
+        if args['simple'] is False:
+            print("{} target(s) found.".format(len(targets)))
 
-    def fetch(self, nclient, args):
-        print(nclient.event(args['query_name']))
+    def open(self, nclient, args):
+        field_defs = args['field_defs']
+        fields = None
+        if len(field_defs) > 0:
+            fields = {}
+            for s in field_defs:
+                fname, ftype = s.split(':')
+                fields[fname] = ftype
+
+        auto_field = not args['suppress_auto_field']
+
+        nclient.open(args['target'][0], fields, auto_field)
+
+    def close(self, nclient, args):
+        nclient.close(args['target'][0])
+
+    def modify(self, nclient, args):
+        auto_field = args['bool_value'][0] in ['yes', 'true', 'auto']
+
+        nclient.modify(args['target'][0], auto_field)
 
 
 class QueryCmd(object):
@@ -72,36 +89,19 @@ class FieldCmd(object):
         nclient.reserve(target, field, type)
 
 
-class TargetCmd(object):
-    def list(self, nclient, args):
-        if args['simple'] is False:
-            print("{}\t{}".format("TARGET", "AUTO_FIELD"))
-        targets = nclient.targets()
-        for t in targets:
-            print("{}\t{}".format(t['name'], t['auto_field']))
-        if args['simple'] is False:
-            print("{} target(s) found.".format(len(targets)))
+class EventCmd(object):
+    def send(self, nclient, args):
+        buffer = []
+        for line in sys.stdin:
+            if len(buffer) >= args['batch_size']:
+                nclient.send(args['target'], buffer)
+                buffer = []
+                buffer.append(json.loads(line))
+            if len(buffer) > 0:
+                nclient.send(args['target'], buffer)
 
-    def open(self, nclient, args):
-        field_defs = args['field_defs']
-        fields = None
-        if len(field_defs) > 0:
-            fields = {}
-            for s in field_defs:
-                fname, ftype = s.split(':')
-                fields[fname] = ftype
-
-        auto_field = not args['suppress_auto_field']
-
-        nclient.open(args['target'][0], fields, auto_field)
-
-    def close(self, nclient, args):
-        nclient.close(args['target'][0])
-
-    def modify(self, nclient, args):
-        auto_field = args['bool_value'][0] in ['yes', 'true', 'auto']
-
-        nclient.modify(args['target'][0], auto_field)
+    def fetch(self, nclient, args):
+        print(nclient.event(args['query_name']))
 
 
 class AdminCmd(object):
@@ -154,27 +154,7 @@ def main(argv=sys.argv):
 
     command = args['command']
     sub = args['sub']
-    if command == 'event':
-        c = EventCmd()
-        if sub == 'send':
-            c.send(nclient, args)
-        elif sub == 'fetch':
-            c.fetch(nclient, args)
-    elif command == 'field':
-        c = FieldCmd()
-        if sub == 'list':
-            c.list(nclient, args)
-        elif sub == 'add':
-            c.add(nclient, args)
-    elif command == 'query':
-        c = QueryCmd()
-        if sub == 'list':
-            c.list(nclient, args)
-        elif sub == 'add':
-            c.add(nclient, args)
-        elif sub == 'remove':
-            c.remove(nclient, args)
-    elif command == 'target':
+    if command == 'target':
         c = TargetCmd()
         if sub == 'list':
             c.list(nclient, args)
@@ -184,6 +164,26 @@ def main(argv=sys.argv):
             c.close(nclient, args)
         elif sub == 'modify':
             c.modify(nclient, args)
+    elif command == 'query':
+        c = QueryCmd()
+        if sub == 'list':
+            c.list(nclient, args)
+        elif sub == 'add':
+            c.add(nclient, args)
+        elif sub == 'remove':
+            c.remove(nclient, args)
+    elif command == 'field':
+        c = FieldCmd()
+        if sub == 'list':
+            c.list(nclient, args)
+        elif sub == 'add':
+            c.add(nclient, args)
+    elif command == 'event':
+        c = EventCmd()
+        if sub == 'send':
+            c.send(nclient, args)
+        elif sub == 'fetch':
+            c.fetch(nclient, args)
     elif command == 'admin':
         c = AdminCmd()
         if sub == 'stats':

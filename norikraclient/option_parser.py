@@ -5,27 +5,40 @@ from __future__ import division, print_function, absolute_import
 import argparse
 
 
-def parse_event(origargs):
+def parse_target(origargs):
     parser = argparse.ArgumentParser(add_help=False)
     subparsers = parser.add_subparsers(help='sub commands', dest='sub')
 
-    # fetch
-    parser_fetch = subparsers.add_parser('fetch',
-                                         help="fetch events from specified query")
-    parser_fetch.add_argument('query_name', nargs='*',
-                              help="fetch events from specified query")
+    # list
+    parser_list = subparsers.add_parser('list',
+                                        help="show list of targets")
+    parser_list.add_argument('-s', '--simple', action='store_true',
+                             help="suppress header/footer")
 
-    # send
-    parser_send = subparsers.add_parser('send', help="send data into targets")
-    parser_send.add_argument('--batch_size', action='store', type=int, default=10000,
-                             help="records sent in once transferring (default: 10000)")
-    parser_send.add_argument('target')
+    # open
+    parser_open = subparsers.add_parser('open',
+                                        help="create new target (and define its fields)")
+    parser_open.add_argument('-x', '--suppress_auto_field', action='store_true',
+                             help="suppress to define fields automatically")
+    parser_open.add_argument('target', nargs=1)
+    parser_open.add_argument('field_defs', nargs="*")
+
+    # close
+    parser_close = subparsers.add_parser('close',
+                                         help="close existing target and all its queries")
+    parser_close.add_argument('target', nargs=1)
+
+    # modify
+    parser_modify = subparsers.add_parser('modify',
+                                          help="modify target to do define fields automatically or not")
+    parser_modify.add_argument('target', nargs=1)
+    parser_modify.add_argument('bool_value', nargs=1)
 
     args = parser.parse_args(origargs.rest)
 
     # convert to dict in order to merge all args
     dict_orig = vars(origargs)
-    dict_orig['command'] = 'event'
+    dict_orig['command'] = 'target'
     dict_args = vars(args)
     dict_orig.update(dict_args)
 
@@ -93,40 +106,27 @@ def parse_field(origargs):
     return dict_orig
 
 
-def parse_target(origargs):
+def parse_event(origargs):
     parser = argparse.ArgumentParser(add_help=False)
     subparsers = parser.add_subparsers(help='sub commands', dest='sub')
 
-    # list
-    parser_list = subparsers.add_parser('list',
-                                        help="show list of targets")
-    parser_list.add_argument('-s', '--simple', action='store_true',
-                             help="suppress header/footer")
+    # fetch
+    parser_fetch = subparsers.add_parser('fetch',
+                                         help="fetch events from specified query")
+    parser_fetch.add_argument('query_name', nargs='*',
+                              help="fetch events from specified query")
 
-    # open
-    parser_open = subparsers.add_parser('open',
-                                        help="create new target (and define its fields)")
-    parser_open.add_argument('-x', '--suppress_auto_field', action='store_true',
-                             help="suppress to define fields automatically")
-    parser_open.add_argument('target', nargs=1)
-    parser_open.add_argument('field_defs', nargs="*")
-
-    # close
-    parser_close = subparsers.add_parser('close',
-                                         help="close existing target and all its queries")
-    parser_close.add_argument('target', nargs=1)
-
-    # modify
-    parser_modify = subparsers.add_parser('modify',
-                                          help="modify target to do define fields automatically or not")
-    parser_modify.add_argument('target', nargs=1)
-    parser_modify.add_argument('bool_value', nargs=1)
+    # send
+    parser_send = subparsers.add_parser('send', help="send data into targets")
+    parser_send.add_argument('--batch_size', action='store', type=int, default=10000,
+                             help="records sent in once transferring (default: 10000)")
+    parser_send.add_argument('target')
 
     args = parser.parse_args(origargs.rest)
 
     # convert to dict in order to merge all args
     dict_orig = vars(origargs)
-    dict_orig['command'] = 'target'
+    dict_orig['command'] = 'event'
     dict_args = vars(args)
     dict_orig.update(dict_args)
 
